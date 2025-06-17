@@ -1,0 +1,36 @@
+name: Build Kaiten CSV
+
+on:
+  schedule:
+    - cron:  '*/30 * * * *'      # каждые 30 минут
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install openai requests
+
+      - name: Generate CSV
+        env:
+          KAITEN_TOKEN:   ${{ secrets.KAITEN_TOKEN }}
+          BOARD_ID:       ${{ secrets.BOARD_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python generate_csv.py
+
+      - name: Commit & push
+        run: |
+          git config user.name  "kaiten-bot"
+          git config user.email "bot@example.com"
+          git add kaiten_cards.csv
+          git commit -m "auto: update csv $(date -u '+%Y-%m-%dT%H:%M')" || echo "No changes"
+          git push

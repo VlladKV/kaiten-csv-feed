@@ -2,8 +2,8 @@ name: Build Kaiten CSV
 
 on:
   schedule:
-    - cron:  '*/30 * * * *'      # каждые 30 минут
-  workflow_dispatch:
+    - cron:  '*/30 * * * *'     # каждые 30 минут
+  workflow_dispatch:            # запуск вручную
 
 jobs:
   build:
@@ -17,17 +17,16 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install deps
-        run: pip install openai requests
+      - name: Install dependencies
+        run: pip install requests sumy
 
       - name: Generate CSV
         env:
-          KAITEN_TOKEN:   ${{ secrets.KAITEN_TOKEN }}
-          BOARD_ID:       ${{ secrets.BOARD_ID }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          KAITEN_TOKEN: ${{ secrets.KAITEN_TOKEN }}
+          BOARD_ID:     ${{ secrets.BOARD_ID }}
         run: python generate_csv.py
 
-      - name: Commit & push
+      - name: Commit & push CSV
         run: |
           git config user.name  "kaiten-bot"
           git config user.email "bot@example.com"
